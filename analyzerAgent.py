@@ -31,9 +31,9 @@ class AnalyzerAgent:
         if not story or not story.strip():
             raise ValueError("Story cannot be empty")
 
-        agent_md = Path( r"E:\project\ai\langchain-poc\docs\md\settle\ANALYZER_AGENTS.md" ).read_text(encoding="utf-8")
+        agent_md = Path(ANALYZER_AGENT_MD).read_text(encoding="utf-8")
 
-        architect_md = Path( r"E:\project\ai\langchain-poc\docs\md\settle\ARCHITECTURE.md" ).read_text(encoding="utf-8")
+        architect_md = Path(ARCHITECT_MD).read_text(encoding="utf-8")
 
         prompt = f"""
 You are a Analyzer Agent.

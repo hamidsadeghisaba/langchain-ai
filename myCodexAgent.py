@@ -112,7 +112,7 @@ class MyCodexAgent:
 
         return tuple(overrides)
 
-    def run(self, prompt: str) -> AgentResult:
+    def run(self, prompt: str) -> str:
         started = time.perf_counter()
 
         with Codex(self.codex_config) as codex:

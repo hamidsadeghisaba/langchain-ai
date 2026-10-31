@@ -30,7 +30,7 @@ class TestAnalyzerAgent:
                     ),
                     GraphifyServerConfig(
                         name=GRAPHIPY_TEST,
-                        graph_path= TEST_PROJECT_PATH+GRAPHIPY_JSON,
+                        graph_path=( TEST_PROJECT_PATH / GRAPHIPY_JSON ),
                         python=PYTHON_CMD,
                     ),
                 ),
@@ -334,6 +334,4 @@ Do not include an AI report, token usage, MCP statistics,
 or internal reasoning in the final response.
 """
 
-        result = self.codex.run(prompt)
-
-        return result.response
+        return self.codex.run(prompt)

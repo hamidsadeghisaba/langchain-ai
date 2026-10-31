@@ -38,7 +38,7 @@ class TesterAgent:
         self,
         story: str,
         development_result: str,
-        test_analysis: str,
+        test_analysis: str | None = None,
     ) -> str:
 
         if not story or not story.strip():
@@ -49,9 +49,12 @@ class TesterAgent:
                 "Development result must not be empty"
             )
 
-        if not test_analysis or not test_analysis.strip():
-            raise ValueError(
-                "Test analysis must not be empty"
+        test_analysis = (test_analysis or "").strip()
+        if not test_analysis:
+            test_analysis = (
+                "No separate test analysis was supplied. Use the story, "
+                "development result, production source, and existing test "
+                "patterns as the source of truth."
             )
 
         prompt = f"""
@@ -187,5 +190,4 @@ not be executed.
 Do not include token usage, MCP statistics, or an AI report.
 """
 
-        result = self.codex.run(prompt)
-        return result.response
+        return self.codex.run(prompt)

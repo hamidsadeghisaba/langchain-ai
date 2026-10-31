@@ -1,12 +1,15 @@
+import os
 from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
 
 # PATHS
 # PROJECT_REPO
 PROJECT_PATH :Path = Path(r"E:\project\dotin\PTS")
-TEST_PROJECT_PATH :str = r"E:\project\dotin\PTS\psp-settle-integtest"
+TEST_PROJECT_PATH :Path = Path(r"E:\project\dotin\PTS\psp-settle-integtest")
 MODULE_NAME : str = "settle"
 # MD Files
-CWD = Path(r"./")
+CWD = BASE_DIR
 ARCHITECT_MD = (CWD / "docs/md" / MODULE_NAME / "ARCHITECTURE.md")
 DEVELOPER_AGENT_MD = CWD / "docs/md" / MODULE_NAME / "DEVELOPER_AGENTS.md"
 ANALYZER_AGENT_MD = CWD / "docs/md" / MODULE_NAME / "ANALYZER_AGENTS.md"
@@ -31,3 +34,12 @@ DEEPSEEK_MODEL = "deepseek-v4-flash"
 
 PUBLIC_PROVIDER = DEEPSEEK_PROVIDER
 PUBLIC_MODEL = DEEPSEEK_MODEL
+
+# Persistent workflow data. The task table and LangGraph checkpoints share one
+# SQLite file but remain separate schemas managed by their respective owners.
+WORKFLOW_DATA_DIR = Path(
+    os.environ.get("WORKFLOW_DATA_DIR", BASE_DIR / "data")
+)
+WORKFLOW_DB_PATH = Path(
+    os.environ.get("WORKFLOW_DB_PATH", WORKFLOW_DATA_DIR / "workflow.sqlite3")
+)
