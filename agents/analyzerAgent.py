@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from config import ANALYZER_AGENT_MD, ARCHITECT_MD, GRAPHIPY_JSON, GRAPHIPY_PRODUCT, PROJECT_PATH, PUBLIC_MODEL, PUBLIC_PROVIDER, PYTHON_CMD
-from myCodexAgent import (
+from agents.myCodexAgent import (
     MyCodexAgent,
     CodexAgentConfig,
     GraphifyServerConfig

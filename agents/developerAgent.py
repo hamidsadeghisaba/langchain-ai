@@ -10,7 +10,7 @@ from config import (
     PYTHON_CMD
 )
 
-from myCodexAgent import (
+from agents.myCodexAgent import (
     MyCodexAgent,
     CodexAgentConfig,
     GraphifyServerConfig,

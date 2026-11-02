@@ -6,16 +6,19 @@ from pathlib import Path
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.types import Command
 
-from analyzerAgent import AnalyzerAgent
-from config import WORKFLOW_DB_PATH
-from developerAgent import DeveloperAgent
-from task_queue import (
-    SQLiteTaskRepository,
+from agents.analyzerAgent import AnalyzerAgent
+from config import TASK_DATABASE_URL, TASK_REPOSITORY_BACKEND, WORKFLOW_DB_PATH
+from agents.developerAgent import DeveloperAgent
+from service.repository.task_repository import (
+    PersistentTaskRepository,
+    create_task_repository
+)
+from service.model.task_queue import (
     Task,
     TaskStage,
     TaskStatus,
 )
-from testAgent import TesterAgent
+from agents.testAgent import TesterAgent
 from workflow import AgentState, build_graph, initial_state
 
 
@@ -54,7 +57,7 @@ class TaskWorkflowService:
 
     def __init__(
         self,
-        repository: SQLiteTaskRepository,
+        repository: PersistentTaskRepository,
         graph,
     ):
         self.repository = repository
@@ -182,7 +185,7 @@ class TaskWorkflowRuntime:
     def __init__(
         self,
         *,
-        repository: SQLiteTaskRepository,
+        repository: PersistentTaskRepository,
         graph,
         checkpoint_store: SQLiteCheckpointStore,
     ):
@@ -200,7 +203,11 @@ class TaskWorkflowRuntime:
         developer=None,
         tester=None,
     ) -> "TaskWorkflowRuntime":
-        repository = SQLiteTaskRepository(db_path)
+        repository = create_task_repository(
+            backend=TASK_REPOSITORY_BACKEND,
+            sqlite_db_path=db_path,
+            database_url=TASK_DATABASE_URL,
+        )
         checkpoint_store = SQLiteCheckpointStore(db_path)
         graph = build_graph(
             repository=repository,
@@ -218,6 +225,7 @@ class TaskWorkflowRuntime:
         return runtime
 
     def close(self) -> None:
+        self.repository.close()
         self.checkpoint_store.close()
 
     def __enter__(self) -> "TaskWorkflowRuntime":

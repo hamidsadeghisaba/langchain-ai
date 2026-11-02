@@ -1,4 +1,4 @@
-from task_service import TaskWorkflowRuntime
+from service.task_service import TaskWorkflowRuntime
 
 
 def main() -> None:

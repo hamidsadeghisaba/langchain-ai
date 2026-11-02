@@ -5,9 +5,10 @@ from typing import Protocol, TypedDict
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 
-from task_queue import (
+from service.repository.task_repository import PersistentTaskRepository
+
+from service.model.task_queue import (
     InvalidTaskTransitionError,
-    SQLiteTaskRepository,
     Task,
     TaskStage,
 )
@@ -49,7 +50,7 @@ class WorkflowNodes:
 
     def __init__(
         self,
-        repository: SQLiteTaskRepository,
+        repository: PersistentTaskRepository,
         analyzer: AnalyzerAgentProtocol,
         developer: DeveloperAgentProtocol,
         tester: TesterAgentProtocol,
@@ -196,7 +197,7 @@ def _select_start_node(state: AgentState) -> str:
 
 def build_graph(
     *,
-    repository: SQLiteTaskRepository,
+    repository: PersistentTaskRepository,
     analyzer: AnalyzerAgentProtocol,
     developer: DeveloperAgentProtocol,
     tester: TesterAgentProtocol,

@@ -1,7 +1,17 @@
 /.idea
-/.venv
-/.venv/
+# /.venv
+# /.venv/
 /.idea/
+/.vscode
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
 /__pycache__
+/.pytest_cache
 /__pycache__/
+
 /data/
+# /.env
+/graphify-out

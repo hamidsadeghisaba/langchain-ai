@@ -1,5 +1,5 @@
 from config import GRAPHIPY_JSON, GRAPHIPY_PRODUCT, GRAPHIPY_TEST, PUBLIC_MODEL, PUBLIC_PROVIDER, PYTHON_CMD, TEST_PROJECT_PATH, PROJECT_PATH
-from myCodexAgent import (
+from agents.myCodexAgent import (
     MyCodexAgent,
     CodexAgentConfig,
     GraphifyServerConfig,

@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -43,3 +46,11 @@ WORKFLOW_DATA_DIR = Path(
 WORKFLOW_DB_PATH = Path(
     os.environ.get("WORKFLOW_DB_PATH", WORKFLOW_DATA_DIR / "workflow.sqlite3")
 )
+
+# Task metadata can use SQLite or PostgreSQL. When PostgreSQL is selected,
+# WORKFLOW_DB_PATH still holds the LangGraph-compatible SQLite checkpoints.
+TASK_REPOSITORY_BACKEND = os.environ.get(
+    "TASK_REPOSITORY_BACKEND",
+    "sqlite",
+).strip().lower()
+TASK_DATABASE_URL = os.environ.get("TASK_DATABASE_URL")

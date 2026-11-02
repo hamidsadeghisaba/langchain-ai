@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import uuid
-
 import streamlit as st
 import base64 
 from pathlib import Path
 
-from task_queue import Task, TaskStage, TaskStatus
-from task_service import TaskWorkflowRuntime
+from service.model.task_queue import Task, TaskStage, TaskStatus
+from service.task_service import TaskWorkflowRuntime
+
 
 FONT_DIR = Path(__file__).parent / "assets" / "fonts"
 

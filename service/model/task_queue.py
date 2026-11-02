@@ -81,7 +81,7 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-class SQLiteTaskRepository:
+class PersistantTaskRepository:
     """Durable, SQLite-backed stage queues with atomic task claims."""
 
     def __init__(self, db_path: str | Path):
