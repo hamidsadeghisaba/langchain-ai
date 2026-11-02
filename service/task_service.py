@@ -1,19 +1,21 @@
 from __future__ import annotations
 
-import sqlite3
 from pathlib import Path
 
-from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.types import Command
 
 from agents.analyzerAgent import AnalyzerAgent
 from config import TASK_DATABASE_URL, TASK_REPOSITORY_BACKEND, WORKFLOW_DB_PATH
 from agents.developerAgent import DeveloperAgent
+from service.checkpointer import (
+    CheckpointStore,
+    create_checkpoint_store,
+)
 from service.repository.task_repository import (
     PersistentTaskRepository,
     create_task_repository
 )
-from service.model.task_queue import (
+from service.model.task_models import (
     Task,
     TaskStage,
     TaskStatus,
@@ -24,32 +26,6 @@ from workflow import AgentState, build_graph, initial_state
 
 class TaskAwaitingApprovalError(RuntimeError):
     pass
-
-
-class SQLiteCheckpointStore:
-    """Own the long-lived SQLite connection used by LangGraph."""
-
-    def __init__(self, db_path: str | Path):
-        self.db_path = Path(db_path).resolve()
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.connection = sqlite3.connect(
-            self.db_path,
-            timeout=5.0,
-            check_same_thread=False,
-        )
-        self.connection.execute("PRAGMA journal_mode = WAL")
-        self.connection.execute("PRAGMA busy_timeout = 5000")
-        self.saver = SqliteSaver(self.connection)
-        self.saver.setup()
-
-    def close(self) -> None:
-        self.connection.close()
-
-    def __enter__(self) -> "SQLiteCheckpointStore":
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
-        self.close()
 
 
 class TaskWorkflowService:
@@ -187,7 +163,7 @@ class TaskWorkflowRuntime:
         *,
         repository: PersistentTaskRepository,
         graph,
-        checkpoint_store: SQLiteCheckpointStore,
+        checkpoint_store: CheckpointStore,
     ):
         self.repository = repository
         self.graph = graph
@@ -198,35 +174,45 @@ class TaskWorkflowRuntime:
     def create(
         cls,
         *,
-        db_path: str | Path = WORKFLOW_DB_PATH,
+        db_path: str | Path | None = None,
         analyzer=None,
         developer=None,
         tester=None,
     ) -> "TaskWorkflowRuntime":
+        repository_db_path = WORKFLOW_DB_PATH if db_path is None else db_path
         repository = create_task_repository(
             backend=TASK_REPOSITORY_BACKEND,
-            sqlite_db_path=db_path,
+            sqlite_db_path=repository_db_path,
             database_url=TASK_DATABASE_URL,
         )
-        checkpoint_store = SQLiteCheckpointStore(db_path)
-        graph = build_graph(
-            repository=repository,
-            analyzer=analyzer or AnalyzerAgent(),
-            developer=developer or DeveloperAgent(),
-            tester=tester or TesterAgent(),
-            checkpointer=checkpoint_store.saver,
-        )
-        runtime = cls(
-            repository=repository,
-            graph=graph,
-            checkpoint_store=checkpoint_store,
-        )
-        repository.recover_interrupted_tasks()
-        return runtime
+        checkpoint_store = None
+        try:
+            checkpoint_store = create_checkpoint_store(sqlite_path=db_path)
+            graph = build_graph(
+                repository=repository,
+                analyzer=analyzer or AnalyzerAgent(),
+                developer=developer or DeveloperAgent(),
+                tester=tester or TesterAgent(),
+                checkpointer=checkpoint_store.checkpointer,
+            )
+            runtime = cls(
+                repository=repository,
+                graph=graph,
+                checkpoint_store=checkpoint_store,
+            )
+            repository.recover_interrupted_tasks()
+            return runtime
+        except Exception:
+            if checkpoint_store is not None:
+                checkpoint_store.close()
+            repository.close()
+            raise
 
     def close(self) -> None:
-        self.repository.close()
-        self.checkpoint_store.close()
+        try:
+            self.repository.close()
+        finally:
+            self.checkpoint_store.close()
 
     def __enter__(self) -> "TaskWorkflowRuntime":
         return self

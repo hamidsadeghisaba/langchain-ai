@@ -7,7 +7,7 @@ from langgraph.types import interrupt
 
 from service.repository.task_repository import PersistentTaskRepository
 
-from service.model.task_queue import (
+from service.model.task_models import (
     InvalidTaskTransitionError,
     Task,
     TaskStage,

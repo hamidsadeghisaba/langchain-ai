@@ -1,7 +1,8 @@
 # LangChain multi-agent workflow
 
 This project persists the Analyzer, Developer, and Tester workflow with
-LangGraph checkpoints and a SQLAlchemy Core task repository.
+LangGraph checkpoints and a SQLAlchemy Core task repository. Checkpoint storage
+can use SQLite or PostgreSQL independently from task metadata storage.
 
 ## Install and run
 
@@ -28,6 +29,13 @@ $env:TASK_TEST_POSTGRES_URL = "postgresql+psycopg://user:password@localhost:5432
 Each PostgreSQL test run creates and removes a uniquely named schema. Without
 this variable, the PostgreSQL cases are reported as skipped.
 
+PostgreSQL checkpointer integration tests use a separate variable:
+
+```powershell
+$env:CHECKPOINT_TEST_POSTGRES_URL = "postgresql://user:password@localhost:5432/test"
+.\.venv\Scripts\python.exe -m pytest tests/test_checkpointer.py -q
+```
+
 ## Task repository configuration
 
 `TASK_REPOSITORY_BACKEND` selects task metadata storage:
@@ -52,13 +60,32 @@ $env:TASK_DB_MAX_OVERFLOW = "10"
 ```
 
 See [.env.example](.env.example) for all repository settings. The application
-reads process environment variables; the example file is not loaded
-automatically.
+loads `.env` through `python-dotenv`; process environment variables take
+precedence over values in that file.
 
-LangGraph continues to use the SQLite checkpointer because changing workflow
-persistence is outside this repository refactor. When PostgreSQL is selected,
-task metadata is stored in PostgreSQL while LangGraph checkpoints remain in
-`WORKFLOW_DB_PATH`.
+## Checkpoint configuration
+
+`CHECKPOINT_BACKEND` selects LangGraph checkpoint storage independently from
+`TASK_REPOSITORY_BACKEND`:
+
+- `sqlite` (default) uses `CHECKPOINT_SQLITE_PATH`. When unset, this defaults to
+  `WORKFLOW_DB_PATH` for backward compatibility.
+- `postgres` uses `CHECKPOINT_POSTGRES_URL` and initializes the LangGraph
+  checkpoint tables when the runtime starts.
+
+SQLite example:
+
+```powershell
+$env:CHECKPOINT_BACKEND = "sqlite"
+$env:CHECKPOINT_SQLITE_PATH = "E:\path\to\checkpoints.sqlite3"
+```
+
+PostgreSQL example:
+
+```powershell
+$env:CHECKPOINT_BACKEND = "postgres"
+$env:CHECKPOINT_POSTGRES_URL = "postgresql://user:password@localhost:5432/workflow"
+```
 
 ## Schema compatibility
 

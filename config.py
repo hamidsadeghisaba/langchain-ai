@@ -47,8 +47,19 @@ WORKFLOW_DB_PATH = Path(
     os.environ.get("WORKFLOW_DB_PATH", WORKFLOW_DATA_DIR / "workflow.sqlite3")
 )
 
+# LangGraph checkpoints use their own backend selection and are independent
+# from task metadata storage.
+CHECKPOINT_BACKEND = os.environ.get(
+    "CHECKPOINT_BACKEND",
+    "sqlite",
+).strip().lower()
+CHECKPOINT_SQLITE_PATH = Path(
+    os.environ.get("CHECKPOINT_SQLITE_PATH", WORKFLOW_DB_PATH)
+)
+CHECKPOINT_POSTGRES_URL = os.environ.get("CHECKPOINT_POSTGRES_URL")
+
 # Task metadata can use SQLite or PostgreSQL. When PostgreSQL is selected,
-# WORKFLOW_DB_PATH still holds the LangGraph-compatible SQLite checkpoints.
+# WORKFLOW_DB_PATH remains the task repository's SQLite default.
 TASK_REPOSITORY_BACKEND = os.environ.get(
     "TASK_REPOSITORY_BACKEND",
     "sqlite",

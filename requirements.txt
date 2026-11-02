@@ -1,6 +1,7 @@
 langchain
 langchain-openai
 langgraph
+langgraph-checkpoint-postgres
 langgraph-checkpoint-sqlite
 openai-codex
 psycopg[binary]>=3.2

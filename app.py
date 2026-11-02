@@ -5,7 +5,7 @@ import streamlit as st
 import base64 
 from pathlib import Path
 
-from service.model.task_queue import Task, TaskStage, TaskStatus
+from service.model.task_models import Task, TaskStage, TaskStatus
 from service.task_service import TaskWorkflowRuntime
 
 
